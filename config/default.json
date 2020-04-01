@@ -1,0 +1,12 @@
+{
+  "PORT": 8080,
+  "databaseSettings": {
+    "mongo_db_connection": "mongodb://127.0.0.1:27017/test",
+    "collection_name": {
+      "tb_users": "tb_users"
+    }
+  },
+  "sharedSecret": {
+    "secret_key": "fded5dfbbdecf015b0ae782abf340cb8"
+  }
+}

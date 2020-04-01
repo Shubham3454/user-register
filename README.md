@@ -1,2 +1,0 @@
-# user-register
-register user 
