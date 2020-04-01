@@ -8,57 +8,50 @@ const registerServises = require('./services')
 
 const thisModule = "register user";
 
-exports.checkUser    = checkUser;
 exports.registerUser = registerUser;
-
-async function checkUser(req, res) {
-          req.apiReference.module = thisModule;
-    const apiReference            = req.apiReference;
-    let   opts                    = req.body;
-
-    try {
-        console.log("+++++======hi")
-        let isUserRegistered = false;
-        let registeredUser   = await registerServises.fetchUser(apiReference, opts.email);
-        console.log("11111registeredUser1", registeredUser)
-        if (registeredUser && registeredUser.length) {
-            isUserRegistered = true;
-        }
-        return responses.actionCompleteResponse(res, { isUserRegistered });
-    } catch (error) {
-        console.log("*****************222", error)
-        return responses.sendActionFailedResponse(res, error.message);
-    }
-}
 
 
 async function registerUser(req, res) {
-    req.apiReference.module = thisModule;
-    const apiReference = req.apiReference;
-    let opts = req.body;
+          req.apiReference.module = thisModule;
+    const apiReference            = req.apiReference;
+    let   opts                    = req.body;
+    let   sendCaptcha             = false;
+    let status;
 
     try {
-        let registeredUser = await registerServises.fetchUser(apiReference, opts.email);
-        console.log("11111registeredUser1", registeredUser)
-        if (registeredUser && registeredUser.length) {
+        let currentTime = Number(new Date());
+        let previousTime = Number(new Date(new Date().getTime() - 60 * 60 * 24 * 1000))
+        let findBoj ={
+            ip : opts.ip,
+            created_at: {
+                $gte:  previousTime,
+                $lt: currentTime
+            }
+        }
+        let registeredUser = await Promise.all([registerServises.fetchUser(apiReference, { email : opts.email}),registerServises.fetchUser(apiReference,findBoj)])
+        if (registeredUser && Array.isArray(registeredUser)  &&  Boolean(registeredUser[0])) {
+            status = constants.responseFlags.NOT_ACCEPTABLE
             throw new Error(constants.responseMessages.USER_ALREADY_REGISTERED);
+        }
+        if (registeredUser && Array.isArray(registeredUser) && !opts.is_captcha_added && registeredUser[1] > 3 ) {
+            sendCaptcha = true;
+            status = constants.responseFlags.NOT_ACCEPTABLE
+                throw new Error(constants.responseMessages.ADD_CAPTCHA);
+
+            
         }
             opts.password     = md5(opts.password);
         let accessToken       = md5(opts.password + new Date().getTime() + commonFunction.generateRandomStringAndNumbers(8));
             opts.access_token = accessToken
-        console.log("--------opts111", opts.access_token)
-        opts.created_at = new Date();
-        opts.user_id    = Number(new Date())
+        opts.created_at      = Number(new Date());
 
         let insertedUser = await registerServises.insertUser(apiReference, opts);
-        console.log("--------------+++++++++++++++---------", insertedUser)
         if (!insertedUser) {
             throw new Error(constants.responseMessages.ACTION_FAILED_RESPONSE);
         }
 
-        return responses.actionCompleteResponse(res);
+        return responses.actionCompleteResponse(res,{send_captcha : sendCaptcha});
     } catch (error) {
-        console.log("********", error)
-        return responses.sendActionFailedResponse(res, error.message);
+        return responses.sendActionFailedResponse(res, error.message,{send_captcha : sendCaptcha},status);
     }
 }
