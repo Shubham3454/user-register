@@ -1,8 +1,9 @@
 # user-register
 register user 
 
-repo is used to register a user through a from 
-install mongo and add url in congif
+1.repo is used to register a user through a from.
 
-to start the repo use -> node app.js
-signup url - fe/register 
+2.install mongo and add url in congif
+
+3.to start the repo use -> node app.js
+4.signup url - fe/register 
