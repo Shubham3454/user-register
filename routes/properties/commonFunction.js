@@ -5,17 +5,16 @@ const mongo    = require('../mongo')
 
 
 
-exports.fetchMongoDataPromisified      = fetchMongoDataPromisified;
+exports.countDataPromisified      = countDataPromisified;
 exports.insertMongoPromisified         = insertMongoPromisified;
 exports.generateRandomStringAndNumbers = generateRandomStringAndNumbers;
 
 
 
-function fetchMongoDataPromisified(apiReference, collectionName, filter) {
+function countDataPromisified(apiReference, collectionName, filter) {
     return new Promise((resolve, reject) => {
-        mongo.fetchData(apiReference, filter, collectionName, function (err, result) {
+        mongo.countData(apiReference, filter, collectionName, function (err, result) {
             if (err) {
-                console.log("errorrrrrr ", err)
                 return reject(err);
             }
             return resolve(result);
@@ -29,7 +28,6 @@ function fetchMongoDataPromisified(apiReference, collectionName, filter) {
 function insertMongoPromisified(apiReference, collectionName, dataToInsert) {
     return new Promise((resolve, reject) => {
         mongo.insertData(apiReference, collectionName, dataToInsert, function (result) {
-            console.log("11112222333,", result)
             if (result.success) {
                 resolve(result.success);
             } else {

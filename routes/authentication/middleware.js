@@ -13,7 +13,6 @@ async function authenticate(req, res, next) {
         }
         return responses.invalidSharedSecret(res, constant.responseMessages.INVALID_SHARED_SECRET);
     } catch (error) {
-        console.log(error)
         return responses.sendActionFailedResponse(res,"SOMETHING WENT WRONG");
     }
 }
